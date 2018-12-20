@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="type1">
+        <item>一般</item>
+        <item>用餐</item>
+        <item>交通</item>
+        <item>服饰</item>
+        <item>美容</item>
+        <item>旅行</item>
+        <item>果蔬</item>
+        <item>日用品</item>
+        <item>网购</item>
+        <item>购物</item>
+    </string-array>
+
+    <string-array name="type2">
+        <item>一般</item>
+        <item>报销</item>
+        <item>工资</item>
+        <item>零花钱</item>
+        <item>兼职</item>
+        <item>红包</item>
+        <item>生活费</item>
+        <item>奖金</item>
+        <item>投资</item>
+        <item>其他</item>
+
+    </string-array>
+
+    <string-array name="typeWay">
+        <item>信用卡</item>
+        <item>现金</item>
+        <item>支付宝</item>
+        <item>微信</item>
+    </string-array>
+
+</resources>
