@@ -63,10 +63,10 @@
                     android:textColor="@color/colorGray" />
 
                 <TextView
-                    android:id="@+id/payout"
+                    android:id="@+id/header_pay"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1000"
+                    android:text="0"
                     android:textColor="@color/colorWhite"
                     android:textSize="24sp" />
             </LinearLayout>
@@ -85,21 +85,14 @@
                     android:textColor="@color/colorGray" />
 
                 <TextView
-                    android:id="@+id/income"
+                    android:id="@+id/header_income"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="998"
+                    android:text="0"
                     android:textColor="@color/colorWhite"
                     android:textSize="24sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        tools:layout_editor_absoluteX="154dp"
-        tools:layout_editor_absoluteY="247dp" />
 
 </android.support.constraint.ConstraintLayout>

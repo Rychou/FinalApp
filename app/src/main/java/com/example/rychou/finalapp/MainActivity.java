@@ -11,11 +11,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.example.rychou.finalapp.DbSchema.CostTable;
 
 public class MainActivity extends AppCompatActivity {
+    private static String TAG = "MainActivity";
     private SQLiteDatabase mDatabase;
+    private TextView mPay;
+    private TextView mIncome;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,17 +36,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 遍历cost表
+        mPay = (TextView) findViewById(R.id.header_pay);
+        mIncome = (TextView) findViewById(R.id.header_income);
         mDatabase = new MySQLiteOpenHelper(getApplicationContext()).getWritableDatabase();
-        Cursor cursor = queryCost(null,null);
-        cursor.moveToFirst();
-        Log.d("COST_TABLE", String.valueOf(cursor.getCount()));
-        while (!cursor.isAfterLast()){
-            String time = cursor.getString(cursor.getColumnIndex(CostTable.Cols.TIME));
-            Log.d("COST_TABLE", time);
-            cursor.moveToNext();
-        }
-        cursor.close();
+
+        updateHeader();
     }
 
     @Override
@@ -67,7 +65,13 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public Cursor queryCost(String whereClause, String[] whereArgs) {
+    @Override
+    public void onResume(){
+        super.onResume();
+        updateHeader();
+    }
+    // 查询Cost表
+    private Cursor queryCost(String whereClause, String[] whereArgs) {
         Cursor cursor = mDatabase.query(
                 CostTable.NAME,
                 null,
@@ -79,4 +83,30 @@ public class MainActivity extends AppCompatActivity {
         );
         return cursor;
     }
+
+    private void updateHeader(){
+        int pay = 0;
+        int income = 0;
+        Cursor cursor = mDatabase.rawQuery("select * from "+CostTable.NAME,null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()){
+            String budget = cursor.getString(cursor.getColumnIndex(CostTable.Cols.BUDGET));
+            String fee = cursor.getString(cursor.getColumnIndex(CostTable.Cols.FEE));
+            if (budget.equals("支出")){
+                pay += Integer.parseInt(fee);
+            }else if(budget.equals("收入")){
+                income += Integer.parseInt(fee);
+            }
+            Log.d("INITHEADER", "种类——>>>"+budget+" 金额-->>>"+fee);
+            cursor.moveToNext();
+        }
+        Log.d("INITHEADER", "支出:"+pay+"收入"+income);
+        cursor.close();
+
+        Log.d(TAG, String.valueOf(mPay.getText())+ " " +mIncome.getText());
+        mPay.setText(String.valueOf(pay));
+        mIncome.setText(String.valueOf(income));
+    }
+
+
 }
