@@ -44,6 +44,8 @@ public class RecorderActivity extends Activity {
     //将这些数据保存一组data 用Data存入sqlite
     private ArrayList<String> Data = new ArrayList<String>();
 
+    private CostBean mCostBean;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +87,6 @@ public class RecorderActivity extends Activity {
                 }
 
                 //根据ID获取RadioButton的选的是 收入 还是 支出
-//                radioButton_selected = (((RadioButton) findViewById(radioButtonId)).getText()).toString();
                 RadioButton radioButton = (RadioButton) findViewById(mRadioGroup.getCheckedRadioButtonId());
                 radioButton_selected = radioButton.getText().toString();
             }
@@ -121,22 +122,14 @@ public class RecorderActivity extends Activity {
                         TextTime.setHint(year + "-" + (month+1) + "-" + dayOfMonth);
                     }
                 },c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH)).show();
-
-
-
             }
         });
 
         //支付方式
-//        final ArrayAdapter<CharSequence> spinnerAdapterWay = ArrayAdapter.createFromResource(this,
-//                R.payway.type, android.R.layout.simple_spinner_item);
-//        waySpinner.setAdapter(spinnerAdapterWay);
-
-        //Spinner获取选中的内容 赋值给add_type
         waySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                way_type = (String) spinner.getSelectedItem();
+                way_type = (String) waySpinner.getSelectedItem();
             }
 
             @Override
@@ -149,14 +142,22 @@ public class RecorderActivity extends Activity {
         Confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Data.clear();
-                Data.add(add_type);
-                Data.add(TextTime.getHint().toString());
-                Data.add(TextMoney.getText().toString());
-                Data.add(radioButton_selected);
-                Data.add(way_type);
-                Data.add(TextComment.getText().toString());
-                WriteData(Data);
+//                Data.clear();
+//                Data.add(add_type);
+//                Data.add(TextTime.getHint().toString());
+//                Data.add(TextMoney.getText().toString());
+//                Data.add(radioButton_selected);
+//                Data.add(way_type);
+//                Data.add(TextComment.getText().toString());
+//                WriteData(Data);
+                mCostBean = new CostBean();
+                mCostBean.setType(add_type);
+                mCostBean.setTime(TextTime.getHint().toString());
+                mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
+                mCostBean.setBudget(radioButton_selected);
+                mCostBean.setWay(way_type);
+                mCostBean.setComment(TextComment.getText().toString());
+                WriteData(mCostBean);
                 finish();
                 overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
                 Log.i("info", "add_type" + add_type);
@@ -175,19 +176,25 @@ public class RecorderActivity extends Activity {
     }
 
 
-    public void WriteData(ArrayList<String> Data) {
+    public void WriteData(CostBean costBean) {
         sqLiteOpenHelper = new MySQLiteOpenHelper(this, "finance.db", null, 1);
         mDataBase = sqLiteOpenHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.clear();
-        values.put("Type", Data.get(0));
-        values.put("Time", Data.get(1));
-        values.put("Fee", Data.get(2));
-        values.put("Budget", Data.get(3));
-        values.put("Way", Data.get(4));
-        values.put("Comment", Data.get(5));
+//        values.put("Type", Data.get(0));
+//        values.put("Time", Data.get(1));
+//        values.put("Fee", Data.get(2));
+//        values.put("Budget", Data.get(3));
+//        values.put("Way", Data.get(4));
+//        values.put("Comment", Data.get(5));
+        values.put("Type", costBean.getType());
+        values.put("Time", costBean.getTime());
+        values.put("Fee", costBean.getFee());
+        values.put("Budget", costBean.getBudget());
+        values.put("Way", costBean.getWay());
+        values.put("Comment", costBean.getComment());
 
-        mDataBase.insert("finance", "Type", values);
+        mDataBase.insert("cost", "Type", values);
         mDataBase.close();
         sqLiteOpenHelper.close();
 

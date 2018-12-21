@@ -14,7 +14,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
     private final String COST_TIME = "Time";
     private final String COST_FEE = "Fee";//金额
     private final String COST_WAY = "Way";//支付方式
-    private final String COST_BUDGE = "Budge";//支出还是收入
+    private final String COST_BUDGE = "Budget";//支出还是收入
     private final String COST_COMMENT = "Comment";//文字备注
 
     //创建cost表
