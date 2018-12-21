@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.rychou.finalapp.DbSchema.CostTable;
+
 public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase mDatabase;
     @Override
@@ -30,12 +32,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        // 遍历cost表
         mDatabase = new MySQLiteOpenHelper(getApplicationContext()).getWritableDatabase();
         Cursor cursor = queryCost(null,null);
-        while (cursor.getCount()>0){
-            Log.d(TAG, cursor.getString());
+        cursor.moveToFirst();
+        Log.d("COST_TABLE", String.valueOf(cursor.getCount()));
+        while (!cursor.isAfterLast()){
+            String time = cursor.getString(cursor.getColumnIndex(CostTable.Cols.TIME));
+            Log.d("COST_TABLE", time);
+            cursor.moveToNext();
         }
+        cursor.close();
     }
 
     @Override
@@ -62,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     public Cursor queryCost(String whereClause, String[] whereArgs) {
         Cursor cursor = mDatabase.query(
-                DbSchema.CostTable.NAME,
+                CostTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
