@@ -18,7 +18,7 @@ public class DbSchema {
             public static final String TIME = "Time";
             public static final String FEE = "Fee";//金额
             public static final String WAY = "Way";//支付方式
-            public static final String BUDGE = "Budge";//支出还是收入
+            public static final String BUDGET = "Budget";//支出还是收入
             public static final String COMMENT = "Comment";//文字备注
 
         }

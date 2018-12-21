@@ -8,27 +8,7 @@ import com.example.rychou.finalapp.DbSchema.CostTable;
 import com.example.rychou.finalapp.DbSchema.UserTable;
 
 public class MySQLiteOpenHelper extends SQLiteOpenHelper {
-    private final String TABLE_NAME_COST = "cost";
     private static final String DATABASE_NAME = "finance.db";
-    //cost字段
-    private final String COST_ID = "_id";
-    private final String COST_TYPE = "Type";//名称（如用餐、服饰）
-    private final String COST_TIME = "Time";
-    private final String COST_FEE = "Fee";//金额
-    private final String COST_WAY = "Way";//支付方式
-    private final String COST_BUDGE = "Budget";//支出还是收入
-    private final String COST_COMMENT = "Comment";//文字备注
-
-    //创建cost表
-    private final String CREATE_COST = "create table " + TABLE_NAME_COST + "(" +
-            COST_ID + " integer primary key autoincrement," +
-            COST_TYPE + " varchar(10) ," +
-            COST_TIME + " varchar(20)," +
-            COST_FEE + " double," +
-            COST_BUDGE + " varchar(10),"+
-            COST_WAY + " varchar(20),"+
-            COST_COMMENT + " varchar(100)" +
-            ")";
 
     public MySQLiteOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -38,20 +18,21 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
     //首次创建时调用 一般用于建库 建表
     @Override
     public void onCreate(SQLiteDatabase db) {
-//        db.execSQL(CREATE_COST);
+        // 创建cost表
         db.execSQL("create table " + CostTable.NAME+"("+
                 " _id integer primary key autoincrement, " +
                 CostTable.Cols.TYPE+", "+
                 CostTable.Cols.TIME+", "+
                 CostTable.Cols.FEE+", "+
-                CostTable.Cols.BUDGE+","+
+                CostTable.Cols.BUDGET+","+
                 CostTable.Cols.WAY+", "+
                 CostTable.Cols.COMMENT+
                 ")"
         );
+        // 创建users表
         db.execSQL("create table " + UserTable.NAME + "(" +
             " _id integer primary key autoincrement, " +
-            UserTable.Cols.USERNAME + ", " +
+            UserTable.Cols.USERNAME + " unique" + ", " +
             UserTable.Cols.PASSWORD +
                 ")"
         );
