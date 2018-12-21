@@ -1,16 +1,19 @@
 package com.example.rychou.finalapp;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
-
+    private SQLiteDatabase mDatabase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +29,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intentRecorder);
             }
         });
+
+
+        mDatabase = new MySQLiteOpenHelper(getApplicationContext()).getWritableDatabase();
+        Cursor cursor = queryCost(null,null);
+        while (cursor.getCount()>0){
+            Log.d(TAG, cursor.getString());
+        }
     }
 
     @Override
@@ -48,5 +58,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public Cursor queryCost(String whereClause, String[] whereArgs) {
+        Cursor cursor = mDatabase.query(
+                DbSchema.CostTable.NAME,
+                null,
+                whereClause,
+                whereArgs,
+                null,
+                null,
+                null
+        );
+        return cursor;
     }
 }

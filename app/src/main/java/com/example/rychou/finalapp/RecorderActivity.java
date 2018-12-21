@@ -177,7 +177,7 @@ public class RecorderActivity extends Activity {
 
 
     public void WriteData(CostBean costBean) {
-        sqLiteOpenHelper = new MySQLiteOpenHelper(this, "finance.db", null, 1);
+        sqLiteOpenHelper = new MySQLiteOpenHelper(this);
         mDataBase = sqLiteOpenHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.clear();

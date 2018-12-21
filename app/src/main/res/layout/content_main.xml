@@ -6,15 +6,100 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
+    tools:layout_editor_absoluteY="81dp"
     tools:showIn="@layout/activity_main">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal"
+        android:padding="24dp">
+
+        <LinearLayout
+            android:id="@+id/date_selete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12"
+                android:textColor="@color/colorWhite"
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:text="/"
+                android:textColor="@color/colorGray" />
+
+            <TextView
+                android:id="@+id/year"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2018"
+                android:textColor="@color/colorGray" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="48dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="支出(元)"
+                    android:textColor="@color/colorGray" />
+
+                <TextView
+                    android:id="@+id/payout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1000"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="24sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="收入(元)"
+                    android:textColor="@color/colorGray" />
+
+                <TextView
+                    android:id="@+id/income"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="998"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="24sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:layout_editor_absoluteX="154dp"
+        tools:layout_editor_absoluteY="247dp" />
 
 </android.support.constraint.ConstraintLayout>

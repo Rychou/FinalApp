@@ -4,10 +4,12 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class MySQLiteOpenHelper extends SQLiteOpenHelper {
-    //表名
-    private final String TABLE_NAME_COST = "cost";
+import com.example.rychou.finalapp.DbSchema.CostTable;
+import com.example.rychou.finalapp.DbSchema.UserTable;
 
+public class MySQLiteOpenHelper extends SQLiteOpenHelper {
+    private final String TABLE_NAME_COST = "cost";
+    private static final String DATABASE_NAME = "finance.db";
     //cost字段
     private final String COST_ID = "_id";
     private final String COST_TYPE = "Type";//名称（如用餐、服饰）
@@ -28,15 +30,31 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
             COST_COMMENT + " varchar(100)" +
             ")";
 
-    public MySQLiteOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, null, 1);
+    public MySQLiteOpenHelper(Context context) {
+        super(context, DATABASE_NAME, null, 1);
     }
 
 
     //首次创建时调用 一般用于建库 建表
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_COST);
+//        db.execSQL(CREATE_COST);
+        db.execSQL("create table " + CostTable.NAME+"("+
+                " _id integer primary key autoincrement, " +
+                CostTable.Cols.TYPE+", "+
+                CostTable.Cols.TIME+", "+
+                CostTable.Cols.FEE+", "+
+                CostTable.Cols.BUDGE+","+
+                CostTable.Cols.WAY+", "+
+                CostTable.Cols.COMMENT+
+                ")"
+        );
+        db.execSQL("create table " + UserTable.NAME + "(" +
+            " _id integer primary key autoincrement, " +
+            UserTable.Cols.USERNAME + ", " +
+            UserTable.Cols.PASSWORD +
+                ")"
+        );
     }
 
     @Override
