@@ -1,21 +1,31 @@
 package com.example.rychou.finalapp;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainFragment extends Fragment {
@@ -23,9 +33,13 @@ public class MainFragment extends Fragment {
     private SQLiteDatabase mDatabase;
     private TextView mPay;
     private TextView mIncome;
-    private RecyclerView mRecyclerView;
-    private CostAdapter mCostAdapter;
-
+    private RecyclerView mTimeGroupRcv;
+    private TimeGroupAdapter mTimeGroupAdapter;
+    private int mTotalPay;
+    private int mTotalIncome;
+    private LinearLayout mDatePicker;
+    private TextView mMonth;
+    private TextView mYear;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.activity_main, container, false);
@@ -43,9 +57,41 @@ public class MainFragment extends Fragment {
         mIncome = (TextView) view.findViewById(R.id.header_income);
         mDatabase = new MySQLiteOpenHelper(getContext()).getWritableDatabase();
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.cost_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        mTimeGroupRcv = (RecyclerView) view.findViewById(R.id.time_group_recycler_view);
+        mTimeGroupRcv.setLayoutManager(linearLayoutManager);
 
+        mMonth = (TextView) view.findViewById(R.id.header_month);
+        mYear = (TextView) view.findViewById(R.id.header_year);
+        Calendar calendar = Calendar.getInstance();
+        mMonth.setText(String.valueOf(calendar.get(Calendar.MONTH+1)));
+        mYear.setText(String.valueOf(calendar.get(Calendar.YEAR)));
+        // 首页头部的日期选择
+        mDatePicker= (LinearLayout)view.findViewById(R.id.date_selete);
+        mDatePicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar cd = Calendar.getInstance();
+                MyDatePickerDialog myDatePickerDialog = new MyDatePickerDialog(getContext(),android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
+                        new MyDatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
+                                int month = monthOfYear + 1;
+                                mMonth.setText(String.valueOf(month));
+                                mYear.setText(String.valueOf(year));
+
+                            }
+                        },cd.get(Calendar.YEAR),cd.get(Calendar.MONTH),cd.get(Calendar.DAY_OF_MONTH));
+                myDatePickerDialog.myShow();
+                // 将对话框的大小按屏幕大小的百分比设置
+                WindowManager windowManager = getActivity().getWindowManager();
+                Display display = windowManager.getDefaultDisplay();
+                WindowManager.LayoutParams lp = myDatePickerDialog.getWindow().getAttributes();
+                lp.width = (int)(display.getWidth() * 0.8); //设置宽度
+                myDatePickerDialog.getWindow().setAttributes(lp);
+                ((ViewGroup)((ViewGroup) myDatePickerDialog.getDatePicker().getChildAt(0)).getChildAt(0)).getChildAt(2).setVisibility(View.GONE);
+            }
+        });
         updateUI();
         return view;
     }
@@ -58,11 +104,27 @@ public class MainFragment extends Fragment {
 
 
     private void updateUI(){
-        int pay = 0;
-        int income = 0;
-        List<CostBean> mCostBeans = new ArrayList<CostBean>();;
 
-        Cursor cursor = mDatabase.rawQuery("select * from "+ DbSchema.CostTable.NAME,null);
+        List<String> mTimeGroup = new ArrayList();
+        Cursor timeCursor = mDatabase.rawQuery("select time from cost GROUP BY time ORDER BY time DESC", null);
+        timeCursor.moveToFirst();
+
+        while (!timeCursor.isAfterLast()){
+            String time = timeCursor.getString(0);
+            mTimeGroup.add(time);
+            Log.d(TAG, time);
+            timeCursor.moveToNext();
+        }
+
+        mTimeGroupAdapter = new TimeGroupAdapter(mTimeGroup);
+        mTimeGroupRcv.setAdapter(mTimeGroupAdapter);
+        timeCursor.close();
+
+    }
+
+    public CostAdapter renderCostList(String currentTime){
+        List<CostBean> mCostBeans = new ArrayList<CostBean>();;
+        Cursor cursor = mDatabase.rawQuery("select * from "+ DbSchema.CostTable.NAME + "  where time=? ",new String[]{ currentTime});
         cursor.moveToFirst();
         while (!cursor.isAfterLast()){
             int id = cursor.getInt(cursor.getColumnIndex(DbSchema.CostTable.Cols.ID));
@@ -74,26 +136,79 @@ public class MainFragment extends Fragment {
             String comment = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.COMMENT));
 
             if (budget.equals("支出")){
-                pay += Integer.parseInt(fee);
+                mTotalPay += Integer.parseInt(fee);
             }else if(budget.equals("收入")){
-                income += Integer.parseInt(fee);
+                mTotalIncome += Integer.parseInt(fee);
             }
             Log.d(TAG, "ID为——》》"+id);
             Log.d(TAG, "种类——>>>"+budget+" 金额-->>>"+fee);
             mCostBeans.add(new CostBean(id,type,way,Double.parseDouble(fee),time,budget,comment));
             cursor.moveToNext();
         }
-        Log.d(TAG, "支出:"+pay+"收入"+income);
-
-        mCostAdapter = new CostAdapter(mCostBeans);
-        mRecyclerView.setAdapter(mCostAdapter);
 
         // 更新收入支出总额。
-        mPay.setText(String.valueOf(pay));
-        mIncome.setText(String.valueOf(income));
+        mPay.setText(String.valueOf(mTotalPay));
+        mIncome.setText(String.valueOf(mTotalIncome));
         cursor.close();
+        return new CostAdapter(mCostBeans);
     }
 
+    // 时间分组 嵌套列表第一层
+    private class TimeGroupHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        private TextView mTimeGroup;
+        private RecyclerView mCostListRcv;
+        private CostAdapter mCostAdapter;
+
+        public TimeGroupHolder(LayoutInflater inflater, ViewGroup parent){
+            super(inflater.inflate(R.layout.time_item, parent, false));
+            itemView.setOnClickListener(this);
+            mTimeGroup = (TextView) itemView.findViewById(R.id.time_group);
+        }
+
+        public void bind(String time){
+            mTimeGroup.setText(time);
+            mCostListRcv = (RecyclerView) itemView.findViewById(R.id.cost_recycler_view);
+            mCostListRcv.setLayoutManager(new LinearLayoutManager(getActivity()));
+            mCostAdapter = renderCostList(time);
+
+            mCostListRcv.setAdapter(mCostAdapter);
+        }
+
+        @Override
+        public void onClick(View view) {
+
+        }
+    }
+
+    private class TimeGroupAdapter extends RecyclerView.Adapter<TimeGroupHolder>{
+        private List<String> mTimeGroup;
+        public TimeGroupAdapter(List<String> timeGroup){
+            mTimeGroup = timeGroup;
+            mTotalPay=0;
+            mTotalIncome=0;
+        }
+
+        @NonNull
+        @Override
+        public TimeGroupHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+
+            return new TimeGroupHolder(layoutInflater, parent);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull TimeGroupHolder holder, int position) {
+            String time = mTimeGroup.get(position);
+            holder.bind(time);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mTimeGroup.size();
+        }
+    }
+
+    // 记账列表 嵌套列表第二层
     private class CostHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView mCostType;
         private TextView mCostWay;

@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="24dp">
-
+    android:padding="24dp"
+    android:orientation="horizontal">
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/cost_recycler_view"
+        android:id="@+id/time_group_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
 </LinearLayout>

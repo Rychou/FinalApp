@@ -13,10 +13,12 @@
         <LinearLayout
             android:id="@+id/date_selete"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            >
 
             <TextView
-                android:id="@+id/month"
+                android:id="@+id/header_month"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="12"
@@ -32,7 +34,7 @@
                 android:textColor="@color/colorGray" />
 
             <TextView
-                android:id="@+id/year"
+                android:id="@+id/header_year"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2018"
@@ -89,6 +91,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <include layout="@layout/cost_recycler_view" />
+    <include layout="@layout/time_group_recycler_view" />
 </LinearLayout>
 
