@@ -1,6 +1,8 @@
 package com.example.rychou.finalapp;
 
 public class CostBean {
+    private int mId;
+
     private String mType;
     private String mWay;
     private double mFee;
@@ -8,7 +10,8 @@ public class CostBean {
     private String mBudget;
     private String mComment;
 
-    public CostBean(String type, String way, double fee, String time,String budget, String comment){
+    public CostBean(int id,String type, String way, double fee, String time,String budget, String comment){
+        mId = id;
         mType = type;
         mWay = way;
         mFee = fee;
@@ -18,6 +21,13 @@ public class CostBean {
     }
 
     public CostBean(){}
+    public int getId() {
+        return mId;
+    }
+
+    public void setId(int id) {
+        mId = id;
+    }
     public String getType() {
         return mType;
     }

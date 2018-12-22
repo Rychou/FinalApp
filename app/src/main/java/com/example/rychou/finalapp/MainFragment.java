@@ -65,6 +65,7 @@ public class MainFragment extends Fragment {
         Cursor cursor = mDatabase.rawQuery("select * from "+ DbSchema.CostTable.NAME,null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()){
+            int id = cursor.getInt(cursor.getColumnIndex(DbSchema.CostTable.Cols.ID));
             String type = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.TYPE));
             String way = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.WAY));
             String fee = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.FEE));
@@ -77,8 +78,9 @@ public class MainFragment extends Fragment {
             }else if(budget.equals("收入")){
                 income += Integer.parseInt(fee);
             }
+            Log.d(TAG, "ID为——》》"+id);
             Log.d(TAG, "种类——>>>"+budget+" 金额-->>>"+fee);
-            mCostBeans.add(new CostBean(type,way,Double.parseDouble(fee),time,budget,comment));
+            mCostBeans.add(new CostBean(id,type,way,Double.parseDouble(fee),time,budget,comment));
             cursor.moveToNext();
         }
         Log.d(TAG, "支出:"+pay+"收入"+income);
@@ -121,6 +123,13 @@ public class MainFragment extends Fragment {
         @Override
         public void onClick(View view){
             // 这里点击列表项，查看详情
+//            Intent intent = RecorderActivity.newIntent(getActivity(),mCostBean.getId());
+//            startActivity(intent);
+                Intent intent = new Intent(getActivity().getApplicationContext(),UpdateActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("id",mCostBean.getId());
+                intent.putExtras(bundle);
+                getActivity().startActivity(intent);
         }
     }
 

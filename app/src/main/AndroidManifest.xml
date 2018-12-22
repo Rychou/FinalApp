@@ -29,6 +29,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".RecorderActivity" />
+        <activity android:name=".UpdateActivity" />
     </application>
 
 </manifest>

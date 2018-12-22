@@ -14,6 +14,7 @@ public class DbSchema {
         public static final String NAME = "cost";
 
         public static final class Cols{
+            public static final String ID = "_id";
             public static final String TYPE = "Type";//名称（如用餐、服饰）
             public static final String TIME = "Time";
             public static final String FEE = "Fee";//金额

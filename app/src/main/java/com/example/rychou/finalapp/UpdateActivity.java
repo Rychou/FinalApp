@@ -27,7 +27,7 @@ import java.util.Calendar;
 
 import static android.content.ContentValues.TAG;
 
-public class RecorderActivity extends Activity {
+public class UpdateActivity extends Activity {
 
     private RadioGroup mRadioGroup;
     private TextView TextTime;
@@ -42,6 +42,9 @@ public class RecorderActivity extends Activity {
 
     private Button timer_chooser;
 
+    private SQLiteDatabase db;
+
+
     //保存类型数据
     private String add_type, radioButton_selected, way_type;
 
@@ -49,14 +52,11 @@ public class RecorderActivity extends Activity {
     private ArrayList<String> Data = new ArrayList<String>();
 
     private CostBean mCostBean;
+    private RadioButton PayRadio;
+    private RadioButton IncomeRadio;
 
-//    public static final String EXTRA_COST_ID = "com.example.rychou.finalapp.cost_id";
-//
-//    public static Intent newIntent(Context packageContext,int costId){
-//        Intent intent = new Intent(packageContext,RecorderActivity.class);
-//        intent.putExtra(EXTRA_COST_ID, costId);
-//        return intent;
-//    }
+    private CostBean sqliteCostBean;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,13 @@ public class RecorderActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.recorder);
 
+        Intent intent  = getIntent();
+        final int id = intent.getIntExtra("id",0);
+        Log.d(TAG, "ID---->>" + id);
+
         mRadioGroup = (RadioGroup) findViewById(R.id.recorder_radioGroup);
+        PayRadio  = (RadioButton) mRadioGroup.findViewById(R.id.radio_pay);
+        IncomeRadio = (RadioButton)mRadioGroup.findViewById(R.id.radio_income);
         spinner = (Spinner) findViewById(R.id.record_spinner);
         waySpinner = (Spinner) findViewById(R.id.record_spinner_way);
         Confirm = (Button) findViewById(R.id.recorder_confirm);
@@ -74,7 +80,21 @@ public class RecorderActivity extends Activity {
         TextComment = (EditText) findViewById(R.id.record_textView_comment);
         timer_chooser = (Button) findViewById(R.id.timer_chooser);
 
+        db = new MySQLiteOpenHelper(this).getWritableDatabase();
+        Cursor cursor = db.rawQuery("select * from cost where _id=?", new String[]{String.valueOf(id)});  //创建一个游标
+        if(cursor.moveToFirst()){  //循环遍历查找数组
+            int costid = cursor.getInt(cursor.getColumnIndex(DbSchema.CostTable.Cols.ID));
+            String type = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.TYPE));
+            String way = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.WAY));
+            String fee = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.FEE));
+            String budget = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.BUDGET));
+            String time = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.TIME));
+            String comment = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.COMMENT));
+            sqliteCostBean = new CostBean(costid,type,way,Double.parseDouble(fee),time,budget,comment);
+        }
+        cursor.close();
 
+        TextMoney.setText(Double.toString(sqliteCostBean.getFee()));
         TextMoney.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);//设置输入的钱为数字和小数
 
         //spinner设置属性 设置收入 和 支出的 spinner 利用arrays中的数据
@@ -84,8 +104,28 @@ public class RecorderActivity extends Activity {
         final ArrayAdapter<CharSequence> spinnerAdapterIncome = ArrayAdapter.createFromResource(this,
                 R.array.type2, android.R.layout.simple_spinner_item);
 
+        if (sqliteCostBean.getBudget().equals("支出")){
+            PayRadio.setChecked(true);
+        }else {
+            IncomeRadio.setChecked(true);
+        }
+//        int pos = spinnerAdapterPay.getPosition(sqliteCostBean.getType());
+//        spinner.setSelection(pos);
 
-        spinner.setAdapter(spinnerAdapterPay);//匹配不选情况下默认的pay
+
+        if (sqliteCostBean.getBudget().equals("支出")){
+            PayRadio.setChecked(true);
+            spinner.setAdapter(spinnerAdapterPay);
+            int pos = spinnerAdapterPay.getPosition(sqliteCostBean.getType());
+            spinner.setSelection(pos,true);
+            add_type = (String) spinner.getSelectedItem();
+        }else {
+            IncomeRadio.setChecked(true);
+            spinner.setAdapter(spinnerAdapterIncome);
+            int pos = spinnerAdapterIncome.getPosition(sqliteCostBean.getType());
+            spinner.setSelection(pos,true);
+            add_type = (String) spinner.getSelectedItem();
+        }
         //在radioButton中加入选 支出 还是 收入 的不同情况spinner
         radioButton_selected = "支出";
         mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -125,13 +165,13 @@ public class RecorderActivity extends Activity {
         final int month = cnow.get(Calendar.MONTH)+1;
         final int day = cnow.get(Calendar.DAY_OF_MONTH);
         Log.i("time", "time" + year + month + day);
-        TextTime.setHint(year + "-" + month + "-" + day);
+        TextTime.setHint(sqliteCostBean.getTime());
         //时间选择的dialog
         timer_chooser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Calendar c = Calendar.getInstance();
-                new DatePickerDialog(RecorderActivity.this, new DatePickerDialog.OnDateSetListener() {
+                new DatePickerDialog(UpdateActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                         TextTime.setHint(year + "-" + (month+1) + "-" + dayOfMonth);
@@ -141,6 +181,13 @@ public class RecorderActivity extends Activity {
         });
 
         //支付方式
+        final ArrayAdapter<CharSequence> spinnerAdapterWay = ArrayAdapter.createFromResource(this,
+                R.array.type, android.R.layout.simple_spinner_item);
+        spinnerAdapterWay.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        int pos = spinnerAdapterWay.getPosition(sqliteCostBean.getWay());
+        waySpinner.setSelection(pos,true);
+        way_type = (String) waySpinner.getSelectedItem();
+
         waySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -153,6 +200,8 @@ public class RecorderActivity extends Activity {
             }
         });
 
+        //文字备注
+        TextComment.setText(sqliteCostBean.getComment());
 
         //确定按钮
         Confirm.setOnClickListener(new View.OnClickListener() {
@@ -165,10 +214,12 @@ public class RecorderActivity extends Activity {
                 mCostBean.setBudget(radioButton_selected);
                 mCostBean.setWay(way_type);
                 mCostBean.setComment(TextComment.getText().toString());
-                WriteData(mCostBean);
+                UpdateData(mCostBean,id);
                 finish();
                 overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+                Log.i("info","id---->" + id);
                 Log.i("info", "add_type" + add_type);
+                Log.i("info","way_type--->" +way_type);
                 Log.i("info", "radioButton_selected" + radioButton_selected);
             }
         });
@@ -184,7 +235,7 @@ public class RecorderActivity extends Activity {
     }
 
 
-    public void WriteData(CostBean costBean) {
+    public void UpdateData(CostBean costBean,int id) {
         sqLiteOpenHelper = new MySQLiteOpenHelper(this);
         mDataBase = sqLiteOpenHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -196,7 +247,8 @@ public class RecorderActivity extends Activity {
         values.put("Way", costBean.getWay());
         values.put("Comment", costBean.getComment());
 
-        mDataBase.insert("cost", "Type", values);
+        mDataBase.update("cost", values, "_id=?", new String[] { String.valueOf(id) });
+
         mDataBase.close();
         sqLiteOpenHelper.close();
 
@@ -208,3 +260,4 @@ public class RecorderActivity extends Activity {
     }
 
 }
+
