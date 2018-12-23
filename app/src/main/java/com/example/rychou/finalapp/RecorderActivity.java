@@ -2,14 +2,20 @@ package com.example.rychou.finalapp;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -17,11 +23,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -50,6 +59,11 @@ public class RecorderActivity extends Activity {
 
     private CostBean mCostBean;
 
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
+
+    private Uri photoUri;
+    public static final int REQUEST_CODE_camera = 2222;
 //    public static final String EXTRA_COST_ID = "com.example.rychou.finalapp.cost_id";
 //
 //    public static Intent newIntent(Context packageContext,int costId){
@@ -73,6 +87,23 @@ public class RecorderActivity extends Activity {
         TextMoney = (EditText) findViewById(R.id.record_textView_money);
         TextComment = (EditText) findViewById(R.id.record_textView_comment);
         timer_chooser = (Button) findViewById(R.id.timer_chooser);
+
+        mPhotoButton = (ImageButton) findViewById(R.id.cost_camera);
+        mPhotoView = (ImageView) findViewById(R.id.cost_photo);
+        //拍照按钮
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //向      MediaStore.Images.Media.EXTERNAL_CONTENT_URI   插入一个数据，那么返回标识ID。
+                //在完成拍照后，新的照片会以此处的photoUri命名.   其实就是指定了个文件名
+                ContentValues values = new ContentValues();
+                photoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                //准备intent，并   指定   新   照片   的文件名（photoUri）
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(intent, REQUEST_CODE_camera);
+            }
+        });
 
 
         TextMoney.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);//设置输入的钱为数字和小数
@@ -134,7 +165,11 @@ public class RecorderActivity extends Activity {
                 new DatePickerDialog(RecorderActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        TextTime.setHint(year + "-" + (month+1) + "-" + dayOfMonth);
+                        if (dayOfMonth < 10){
+                            TextTime.setHint(year + "-" + (month+1) + "-0" + dayOfMonth);
+                        }else{
+                            TextTime.setHint(year + "-" + (month+1) + "-" + dayOfMonth);
+                        }
                     }
                 },c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH)).show();
             }
@@ -170,6 +205,7 @@ public class RecorderActivity extends Activity {
                 overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
                 Log.i("info", "add_type" + add_type);
                 Log.i("info", "radioButton_selected" + radioButton_selected);
+
             }
         });
 
@@ -183,6 +219,39 @@ public class RecorderActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_camera) {
+
+            ContentResolver cr = getContentResolver();
+            if (photoUri == null)
+                return;
+            //按刚刚指定的那个文件名，查询数据库，获得更多的照片信息，比如图片的物理绝对路径
+            Cursor cursor = cr.query(photoUri, null, null, null, null);
+            if (cursor != null) {
+                if (cursor.moveToNext()) {
+                    String path = cursor.getString(1);
+                    //获得图片
+                    Bitmap bp = getBitMapFromPath(path);
+                    mPhotoView.setImageBitmap(bp);
+
+                    //写入到数据库
+//                    sqLiteOpenHelper = new MySQLiteOpenHelper(this);
+//                    mDataBase = sqLiteOpenHelper.getWritableDatabase();
+//                    ContentValues cv = new ContentValues();
+//
+//                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+//                    bp.compress(Bitmap.CompressFormat.PNG, 100, os);
+//
+//                    cv.put("img", os.toByteArray());
+//                    mDataBase.insert("cost", "img", cv);
+                }
+                cursor.close();
+            }
+            photoUri = null;
+        }
+    }
 
     public void WriteData(CostBean costBean) {
         sqLiteOpenHelper = new MySQLiteOpenHelper(this);
@@ -201,6 +270,32 @@ public class RecorderActivity extends Activity {
         sqLiteOpenHelper.close();
 
     }
+
+    private Bitmap getBitMapFromPath(String imageFilePath) {
+        Display currentDisplay = getWindowManager().getDefaultDisplay();
+        int dw = currentDisplay.getWidth();
+        int dh = currentDisplay.getHeight();
+
+        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+        bmpFactoryOptions.inJustDecodeBounds = true;
+        Bitmap bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
+        int heightRatio = (int) Math.ceil(bmpFactoryOptions.outHeight
+                / (float) dh);
+        int widthRatio = (int) Math.ceil(bmpFactoryOptions.outWidth
+                / (float) dw);
+
+        if (heightRatio > 1 && widthRatio > 1) {
+            if (heightRatio > widthRatio) {
+                bmpFactoryOptions.inSampleSize = heightRatio;
+            } else {
+                bmpFactoryOptions.inSampleSize = widthRatio;
+            }
+        }
+        bmpFactoryOptions.inJustDecodeBounds = false;
+        bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
+        return bmp;
+    }
+
 
     @Override
     protected void onDestroy() {

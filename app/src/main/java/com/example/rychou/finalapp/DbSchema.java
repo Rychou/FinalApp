@@ -21,6 +21,7 @@ public class DbSchema {
             public static final String WAY = "Way";//支付方式
             public static final String BUDGET = "Budget";//支出还是收入
             public static final String COMMENT = "Comment";//文字备注
+            public static final String IMG_DATA = "img";
 
         }
     }

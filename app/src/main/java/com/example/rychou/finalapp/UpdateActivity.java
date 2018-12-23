@@ -174,7 +174,11 @@ public class UpdateActivity extends Activity {
                 new DatePickerDialog(UpdateActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        TextTime.setHint(year + "-" + (month+1) + "-" + dayOfMonth);
+                        if (dayOfMonth < 10) {
+                            TextTime.setHint(year + "-" + (month + 1) + "-0" + dayOfMonth);
+                        } else {
+                            TextTime.setHint(year + "-" + (month + 1) + "-" + dayOfMonth);
+                        }
                     }
                 },c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH)).show();
             }

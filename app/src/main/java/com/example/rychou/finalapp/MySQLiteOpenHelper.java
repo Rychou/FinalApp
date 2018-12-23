@@ -26,7 +26,8 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
                 CostTable.Cols.FEE+", "+
                 CostTable.Cols.BUDGET+","+
                 CostTable.Cols.WAY+", "+
-                CostTable.Cols.COMMENT+
+                CostTable.Cols.COMMENT+", "+
+                CostTable.Cols.IMG_DATA + " blob"+
                 ")"
         );
         // 创建users表
