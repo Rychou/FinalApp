@@ -40,6 +40,7 @@ public class MainFragment extends Fragment {
     private LinearLayout mDatePicker;
     private TextView mMonth;
     private TextView mYear;
+    private Calendar mSelectedDate;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.activity_main, container, false);
@@ -63,15 +64,17 @@ public class MainFragment extends Fragment {
 
         mMonth = (TextView) view.findViewById(R.id.header_month);
         mYear = (TextView) view.findViewById(R.id.header_year);
-        Calendar calendar = Calendar.getInstance();
-        mMonth.setText(String.valueOf(calendar.get(Calendar.MONTH+1)));
-        mYear.setText(String.valueOf(calendar.get(Calendar.YEAR)));
+
+        mSelectedDate = Calendar.getInstance();
+
+        mMonth.setText(String.valueOf(mSelectedDate.get(Calendar.MONTH)+1));
+        mYear.setText(String.valueOf(mSelectedDate.get(Calendar.YEAR)));
+
         // 首页头部的日期选择
         mDatePicker= (LinearLayout)view.findViewById(R.id.date_selete);
         mDatePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Calendar cd = Calendar.getInstance();
                 MyDatePickerDialog myDatePickerDialog = new MyDatePickerDialog(getContext(),android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
                         new MyDatePickerDialog.OnDateSetListener() {
                             @Override
@@ -79,9 +82,10 @@ public class MainFragment extends Fragment {
                                 int month = monthOfYear + 1;
                                 mMonth.setText(String.valueOf(month));
                                 mYear.setText(String.valueOf(year));
-
+                                mSelectedDate.set(year,monthOfYear,dayOfMonth);
+                                updateUI();
                             }
-                        },cd.get(Calendar.YEAR),cd.get(Calendar.MONTH),cd.get(Calendar.DAY_OF_MONTH));
+                        },mSelectedDate.get(Calendar.YEAR),mSelectedDate.get(Calendar.MONTH),mSelectedDate.get(Calendar.DAY_OF_MONTH));
                 myDatePickerDialog.myShow();
                 // 将对话框的大小按屏幕大小的百分比设置
                 WindowManager windowManager = getActivity().getWindowManager();
@@ -104,22 +108,31 @@ public class MainFragment extends Fragment {
 
 
     private void updateUI(){
+        // 获取当前选择的日期
+        String selectedTime = mYear.getText()+"-"+mMonth.getText();
+        // 这个Calendar对象用来计算当前月份的下个月
+        Calendar nextMonthCalendar = Calendar.getInstance();
+        // mSelectedDate是用户选择的日期Calender对象。
+        nextMonthCalendar.set(Calendar.YEAR,mSelectedDate.get(Calendar.YEAR));
+        nextMonthCalendar.set(Calendar.MONTH,mSelectedDate.get(Calendar.MONTH));
+        nextMonthCalendar.add(Calendar.MONTH,1);//将月份加1
 
+        String nextMonth = nextMonthCalendar.get(Calendar.YEAR)+"-"+String.valueOf(nextMonthCalendar.get(Calendar.MONTH)+1); // 月份获取要+1
+
+        // 时间列表。
         List<String> mTimeGroup = new ArrayList();
-        Cursor timeCursor = mDatabase.rawQuery("select time from cost GROUP BY time ORDER BY time DESC", null);
+        Cursor timeCursor = mDatabase.rawQuery("select time from cost where time BETWEEN ? AND ? GROUP BY time ORDER BY time DESC", new String[]{selectedTime,nextMonth});
         timeCursor.moveToFirst();
 
         while (!timeCursor.isAfterLast()){
             String time = timeCursor.getString(0);
             mTimeGroup.add(time);
-            Log.d(TAG, time);
             timeCursor.moveToNext();
         }
 
         mTimeGroupAdapter = new TimeGroupAdapter(mTimeGroup);
         mTimeGroupRcv.setAdapter(mTimeGroupAdapter);
         timeCursor.close();
-
     }
 
     public CostAdapter renderCostList(String currentTime){
