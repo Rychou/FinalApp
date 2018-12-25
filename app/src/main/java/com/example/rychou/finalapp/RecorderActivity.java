@@ -77,6 +77,7 @@ public class RecorderActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.recorder);
+        Log.d("info","onCreate");
 
         mRadioGroup = (RadioGroup) findViewById(R.id.recorder_radioGroup);
         spinner = (Spinner) findViewById(R.id.record_spinner);
@@ -94,13 +95,15 @@ public class RecorderActivity extends Activity {
         mPhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //向      MediaStore.Images.Media.EXTERNAL_CONTENT_URI   插入一个数据，那么返回标识ID。
-                //在完成拍照后，新的照片会以此处的photoUri命名.   其实就是指定了个文件名
+                //向MediaStore.Images.Media.EXTERNAL_CONTENT_URI插入一个数据，那么返回标识ID。
+                //在完成拍照后，新的照片会以此处的photoUri命名.
                 ContentValues values = new ContentValues();
-                photoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-                //准备intent，并   指定   新   照片   的文件名（photoUri）
+                photoUri = getContentResolver().insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                //准备intent，并指定新照片的文件名（photoUri）
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoUri);
+                //启动拍照的窗体。并注册回调处理。
                 startActivityForResult(intent, REQUEST_CODE_camera);
             }
         });
@@ -165,9 +168,10 @@ public class RecorderActivity extends Activity {
                 new DatePickerDialog(RecorderActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        if (dayOfMonth < 10){
+                        if(dayOfMonth < 10)
+                        {
                             TextTime.setHint(year + "-" + (month+1) + "-0" + dayOfMonth);
-                        }else{
+                        }else {
                             TextTime.setHint(year + "-" + (month+1) + "-" + dayOfMonth);
                         }
                     }
@@ -189,63 +193,87 @@ public class RecorderActivity extends Activity {
         });
 
 
-        //确定按钮
-        Confirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCostBean = new CostBean();
-                mCostBean.setType(add_type);
-                mCostBean.setTime(TextTime.getHint().toString());
-                mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
-                mCostBean.setBudget(radioButton_selected);
-                mCostBean.setWay(way_type);
-                mCostBean.setComment(TextComment.getText().toString());
-                WriteData(mCostBean);
-                finish();
-                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
-                Log.i("info", "add_type" + add_type);
-                Log.i("info", "radioButton_selected" + radioButton_selected);
-
-            }
-        });
-
-        //取消按钮
-        Cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
-            }
-        });
+//        //确定按钮
+//        Confirm.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mCostBean = new CostBean();
+//                mCostBean.setType(add_type);
+//                mCostBean.setTime(TextTime.getHint().toString());
+//                mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
+//                mCostBean.setBudget(radioButton_selected);
+//                mCostBean.setWay(way_type);
+//                mCostBean.setComment(TextComment.getText().toString());
+//                WriteData(mCostBean);
+//                finish();
+//                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+//                Log.i("info", "add_type" + add_type);
+//                Log.i("info", "radioButton_selected" + radioButton_selected);
+//
+//            }
+//        });
+//
+//        //取消按钮
+//        Cancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                finish();
+//                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+//            }
+//        });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_camera) {
 
+        Confirm = (Button) findViewById(R.id.recorder_confirm);
+        Cancel = (Button) findViewById(R.id.recorder_cancel);
+        
+        Log.d("info","onActivityResult");
+        if (requestCode == REQUEST_CODE_camera) {
             ContentResolver cr = getContentResolver();
             if (photoUri == null)
                 return;
-            //按刚刚指定的那个文件名，查询数据库，获得更多的照片信息，比如图片的物理绝对路径
+            //按刚刚指定的那个文件名，查询数据库，获得更多的 照片信息，比如 图片的物理绝对路径
             Cursor cursor = cr.query(photoUri, null, null, null, null);
             if (cursor != null) {
                 if (cursor.moveToNext()) {
                     String path = cursor.getString(1);
                     //获得图片
-                    Bitmap bp = getBitMapFromPath(path);
+                    final Bitmap bp = getBitMapFromPath(path);
                     mPhotoView.setImageBitmap(bp);
 
                     //写入到数据库
-//                    sqLiteOpenHelper = new MySQLiteOpenHelper(this);
-//                    mDataBase = sqLiteOpenHelper.getWritableDatabase();
-//                    ContentValues cv = new ContentValues();
-//
-//                    ByteArrayOutputStream os = new ByteArrayOutputStream();
-//                    bp.compress(Bitmap.CompressFormat.PNG, 100, os);
-//
-//                    cv.put("img", os.toByteArray());
-//                    mDataBase.insert("cost", "img", cv);
+                    //确定按钮
+                    Confirm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mCostBean = new CostBean();
+                            mCostBean.setType(add_type);
+                            mCostBean.setTime(TextTime.getHint().toString());
+                            mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
+                            mCostBean.setBudget(radioButton_selected);
+                            mCostBean.setWay(way_type);
+                            mCostBean.setComment(TextComment.getText().toString());
+                            WriteData(mCostBean,bp);
+                            finish();
+                            overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+                            Log.i("info","img--->"+bp);
+                            Log.i("info", "add_type" + add_type);
+                            Log.i("info", "radioButton_selected" + radioButton_selected);
+
+                        }
+                    });
+
+                    //取消按钮
+                    Cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            finish();
+                            overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+                        }
+                    });
                 }
                 cursor.close();
             }
@@ -253,10 +281,13 @@ public class RecorderActivity extends Activity {
         }
     }
 
-    public void WriteData(CostBean costBean) {
+    public void WriteData(CostBean costBean,Bitmap bmp) {
         sqLiteOpenHelper = new MySQLiteOpenHelper(this);
         mDataBase = sqLiteOpenHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
+
         values.clear();
         values.put("Type", costBean.getType());
         values.put("Time", costBean.getTime());
@@ -264,6 +295,7 @@ public class RecorderActivity extends Activity {
         values.put("Budget", costBean.getBudget());
         values.put("Way", costBean.getWay());
         values.put("Comment", costBean.getComment());
+        values.put("img", os.toByteArray());
 
         mDataBase.insert("cost", "Type", values);
         mDataBase.close();

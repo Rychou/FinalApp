@@ -2,28 +2,41 @@ package com.example.rychou.finalapp;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
@@ -57,6 +70,12 @@ public class UpdateActivity extends Activity {
 
     private CostBean sqliteCostBean;
 
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
+
+    private Uri photoUri;
+    public static final int REQUEST_CODE_camera = 2222;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +101,7 @@ public class UpdateActivity extends Activity {
 
         db = new MySQLiteOpenHelper(this).getWritableDatabase();
         Cursor cursor = db.rawQuery("select * from cost where _id=?", new String[]{String.valueOf(id)});  //创建一个游标
-        if(cursor.moveToFirst()){  //循环遍历查找数组
+        if(cursor.moveToNext()){  //循环遍历查找数组
             int costid = cursor.getInt(cursor.getColumnIndex(DbSchema.CostTable.Cols.ID));
             String type = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.TYPE));
             String way = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.WAY));
@@ -90,9 +109,43 @@ public class UpdateActivity extends Activity {
             String budget = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.BUDGET));
             String time = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.TIME));
             String comment = cursor.getString(cursor.getColumnIndex(DbSchema.CostTable.Cols.COMMENT));
+            byte[] b = cursor.getBlob(cursor.getColumnIndex("img"));
+
+            Log.d("info","img---->"+b);
+
+            Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length, null);
+            if (bitmap != null){
+                mPhotoView.setImageBitmap(bitmap);
+            }
+
             sqliteCostBean = new CostBean(costid,type,way,Double.parseDouble(fee),time,budget,comment);
         }
         cursor.close();
+
+
+
+
+        mPhotoButton = (ImageButton) findViewById(R.id.cost_camera);
+        mPhotoView = (ImageView) findViewById(R.id.cost_photo);
+        //拍照按钮
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //向MediaStore.Images.Media.EXTERNAL_CONTENT_URI插入一个数据，那么返回标识ID。
+                //在完成拍照后，新的照片会以此处的photoUri命名.
+                ContentValues values = new ContentValues();
+                photoUri = getContentResolver().insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                //准备intent，并指定新照片的文件名（photoUri）
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                Bundle bundle = new Bundle();
+                bundle.putInt("id",id);
+                bundle.putString(android.provider.MediaStore.EXTRA_OUTPUT, photoUri.toString());
+                intent.putExtras(bundle);
+                //启动拍照的窗体。并注册回调处理。
+                startActivityForResult(intent, REQUEST_CODE_camera);
+            }
+        });
 
         TextMoney.setText(Double.toString(sqliteCostBean.getFee()));
         TextMoney.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);//设置输入的钱为数字和小数
@@ -208,41 +261,104 @@ public class UpdateActivity extends Activity {
         TextComment.setText(sqliteCostBean.getComment());
 
         //确定按钮
-        Confirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCostBean = new CostBean();
-                mCostBean.setType(add_type);
-                mCostBean.setTime(TextTime.getHint().toString());
-                mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
-                mCostBean.setBudget(radioButton_selected);
-                mCostBean.setWay(way_type);
-                mCostBean.setComment(TextComment.getText().toString());
-                UpdateData(mCostBean,id);
-                finish();
-                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
-                Log.i("info","id---->" + id);
-                Log.i("info", "add_type" + add_type);
-                Log.i("info","way_type--->" +way_type);
-                Log.i("info", "radioButton_selected" + radioButton_selected);
-            }
-        });
+//        Confirm.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mCostBean = new CostBean();
+//                mCostBean.setType(add_type);
+//                mCostBean.setTime(TextTime.getHint().toString());
+//                mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
+//                mCostBean.setBudget(radioButton_selected);
+//                mCostBean.setWay(way_type);
+//                mCostBean.setComment(TextComment.getText().toString());
+//                UpdateData(mCostBean,id);
+//                finish();
+//                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+//                Log.i("info","id---->" + id);
+//                Log.i("info", "add_type" + add_type);
+//                Log.i("info","way_type--->" +way_type);
+//                Log.i("info", "radioButton_selected" + radioButton_selected);
+//            }
+//        });
+//
+//        //取消按钮
+//        Cancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                finish();
+//                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+//            }
+//        });
+    }
 
-        //取消按钮
-        Cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        final int id = data.getIntExtra("id",0);
+
+        Confirm = (Button) findViewById(R.id.recorder_confirm);
+        Cancel = (Button) findViewById(R.id.recorder_cancel);
+
+        Log.d("info","onActivityResult");
+        if (requestCode == REQUEST_CODE_camera) {
+            ContentResolver cr = getContentResolver();
+            if (photoUri == null)
+                return;
+            //按刚刚指定的那个文件名，查询数据库，获得更多的 照片信息，比如 图片的物理绝对路径
+            Cursor cursor = cr.query(photoUri, null, null, null, null);
+            if (cursor != null) {
+                if (cursor.moveToNext()) {
+                    String path = cursor.getString(1);
+                    //获得图片
+                    final Bitmap bp = getBitMapFromPath(path);
+                    mPhotoView.setImageBitmap(bp);
+
+                    //写入到数据库
+                    //确定按钮
+                    Confirm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mCostBean = new CostBean();
+                            mCostBean.setType(add_type);
+                            mCostBean.setTime(TextTime.getHint().toString());
+                            mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
+                            mCostBean.setBudget(radioButton_selected);
+                            mCostBean.setWay(way_type);
+                            mCostBean.setComment(TextComment.getText().toString());
+                            UpdateData(mCostBean,id,bp);
+                            finish();
+                            overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+                            Log.i("info","img--->"+bp);
+                            Log.i("info", "add_type" + add_type);
+                            Log.i("info", "radioButton_selected" + radioButton_selected);
+
+                        }
+                    });
+
+                    //取消按钮
+                    Cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            finish();
+                            overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+                        }
+                    });
+                }
+                cursor.close();
             }
-        });
+            photoUri = null;
+        }
     }
 
 
-    public void UpdateData(CostBean costBean,int id) {
+    public void UpdateData(CostBean costBean,int id,Bitmap bmp) {
         sqLiteOpenHelper = new MySQLiteOpenHelper(this);
         mDataBase = sqLiteOpenHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, os);
+
         values.clear();
         values.put("Type", costBean.getType());
         values.put("Time", costBean.getTime());
@@ -250,12 +366,50 @@ public class UpdateActivity extends Activity {
         values.put("Budget", costBean.getBudget());
         values.put("Way", costBean.getWay());
         values.put("Comment", costBean.getComment());
+        values.put("img",os.toByteArray());
 
         mDataBase.update("cost", values, "_id=?", new String[] { String.valueOf(id) });
 
         mDataBase.close();
         sqLiteOpenHelper.close();
 
+    }
+
+
+    private Bitmap getBitMapFromPath(String imageFilePath) {
+        Display currentDisplay = getWindowManager().getDefaultDisplay();
+        int dw = currentDisplay.getWidth();
+        int dh = currentDisplay.getHeight();
+
+        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+        bmpFactoryOptions.inJustDecodeBounds = true;
+        Bitmap bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
+        int heightRatio = (int) Math.ceil(bmpFactoryOptions.outHeight
+                / (float) dh);
+        int widthRatio = (int) Math.ceil(bmpFactoryOptions.outWidth
+                / (float) dw);
+
+        if (heightRatio > 1 && widthRatio > 1) {
+            if (heightRatio > widthRatio) {
+                bmpFactoryOptions.inSampleSize = heightRatio;
+            } else {
+                bmpFactoryOptions.inSampleSize = widthRatio;
+            }
+        }
+        bmpFactoryOptions.inJustDecodeBounds = false;
+        bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
+        return bmp;
+    }
+
+    public static Bitmap getPicFromBytes(byte[] bytes,
+                                         BitmapFactory.Options opts) {
+        if (bytes != null)
+            if (opts != null)
+                return BitmapFactory.decodeByteArray(bytes, 0, bytes.length,
+                        opts);
+            else
+                return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        return null;
     }
 
     @Override
