@@ -34,7 +34,8 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
         db.execSQL("create table " + UserTable.NAME + "(" +
             " _id integer primary key autoincrement, " +
             UserTable.Cols.USERNAME + " unique" + ", " +
-            UserTable.Cols.PASSWORD +
+            UserTable.Cols.PASSWORD + ", " +
+                UserTable.Cols.SALT +
                 ")"
         );
     }

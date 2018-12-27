@@ -47,9 +47,11 @@ public class SignUpActivity extends AppCompatActivity {
 
     public ContentValues addUser(){
         ContentValues values = new ContentValues();
+        String salt = DbSchema.createSalt();
 
         values.put(DbSchema.UserTable.Cols.USERNAME, mUsername.getText().toString());
-        values.put(DbSchema.UserTable.Cols.PASSWORD, mPassword.getText().toString());
+        values.put(DbSchema.UserTable.Cols.PASSWORD, DbSchema.getMD5(mPassword.getText().toString() + salt));
+        values.put(DbSchema.UserTable.Cols.SALT, salt);
         return values;
     }
 }

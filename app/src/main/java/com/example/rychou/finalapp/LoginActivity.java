@@ -46,7 +46,8 @@ public class LoginActivity extends AppCompatActivity {
                     if(cursor.getCount()>0){
                         cursor.moveToFirst();
                         String password = cursor.getString(cursor.getColumnIndex(UserTable.Cols.PASSWORD));
-                        if(password.equals(mPassword.getText().toString())){
+                        String salt = cursor.getString(cursor.getColumnIndex(UserTable.Cols.SALT));
+                        if(checkAuth(password,mPassword.getText().toString(),salt)){
                             Toast.makeText(LoginActivity.this,"登录成功！",Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
@@ -90,5 +91,9 @@ public class LoginActivity extends AppCompatActivity {
                 null
         );
         return cursor;
+    }
+
+    private Boolean checkAuth(String password, String inputPassword, String salt){
+        return password.equals(DbSchema.getMD5(inputPassword+salt));
     }
 }
