@@ -193,34 +193,34 @@ public class RecorderActivity extends Activity {
         });
 
 
-//        //确定按钮
-//        Confirm.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mCostBean = new CostBean();
-//                mCostBean.setType(add_type);
-//                mCostBean.setTime(TextTime.getHint().toString());
-//                mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
-//                mCostBean.setBudget(radioButton_selected);
-//                mCostBean.setWay(way_type);
-//                mCostBean.setComment(TextComment.getText().toString());
-//                WriteData(mCostBean);
-//                finish();
-//                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
-//                Log.i("info", "add_type" + add_type);
-//                Log.i("info", "radioButton_selected" + radioButton_selected);
-//
-//            }
-//        });
-//
-//        //取消按钮
-//        Cancel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                finish();
-//                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
-//            }
-//        });
+        //确定按钮
+        Confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCostBean = new CostBean();
+                mCostBean.setType(add_type);
+                mCostBean.setTime(TextTime.getHint().toString());
+                mCostBean.setFee(Double.parseDouble(TextMoney.getText().toString()));
+                mCostBean.setBudget(radioButton_selected);
+                mCostBean.setWay(way_type);
+                mCostBean.setComment(TextComment.getText().toString());
+                WriteData(mCostBean);
+                finish();
+                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+                Log.i("info", "add_type" + add_type);
+                Log.i("info", "radioButton_selected" + radioButton_selected);
+
+            }
+        });
+
+        //取消按钮
+        Cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
+            }
+        });
     }
 
     @Override
@@ -233,6 +233,7 @@ public class RecorderActivity extends Activity {
         Log.d("info","onActivityResult");
         if (requestCode == REQUEST_CODE_camera) {
             ContentResolver cr = getContentResolver();
+            Log.d("cr------->", String.valueOf(cr));
             if (photoUri == null)
                 return;
             //按刚刚指定的那个文件名，查询数据库，获得更多的 照片信息，比如 图片的物理绝对路径
@@ -256,7 +257,7 @@ public class RecorderActivity extends Activity {
                             mCostBean.setBudget(radioButton_selected);
                             mCostBean.setWay(way_type);
                             mCostBean.setComment(TextComment.getText().toString());
-                            WriteData(mCostBean,bp);
+                            WriteDataImg(mCostBean,bp);
                             finish();
                             overridePendingTransition(R.animator.push_up_in,R.animator.push_up_out);
                             Log.i("info","img--->"+bp);
@@ -281,7 +282,7 @@ public class RecorderActivity extends Activity {
         }
     }
 
-    public void WriteData(CostBean costBean,Bitmap bmp) {
+    public void WriteDataImg(CostBean costBean,Bitmap bmp) {
         sqLiteOpenHelper = new MySQLiteOpenHelper(this);
         mDataBase = sqLiteOpenHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -296,6 +297,24 @@ public class RecorderActivity extends Activity {
         values.put("Way", costBean.getWay());
         values.put("Comment", costBean.getComment());
         values.put("img", os.toByteArray());
+
+        mDataBase.insert("cost", "Type", values);
+        mDataBase.close();
+        sqLiteOpenHelper.close();
+    }
+
+    public void WriteData(CostBean costBean) {
+        sqLiteOpenHelper = new MySQLiteOpenHelper(this);
+        mDataBase = sqLiteOpenHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.clear();
+        values.put("Type", costBean.getType());
+        values.put("Time", costBean.getTime());
+        values.put("Fee", costBean.getFee());
+        values.put("Budget", costBean.getBudget());
+        values.put("Way", costBean.getWay());
+        values.put("Comment", costBean.getComment());
 
         mDataBase.insert("cost", "Type", values);
         mDataBase.close();

@@ -5,19 +5,18 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:layout_marginTop="15dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:orientation="horizontal"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:background="@color/colorPrimary">
 
         <RadioGroup
             android:gravity="center"
             android:id="@+id/recorder_radioGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
 
             <RadioButton
                 android:layout_marginRight="95dp"
@@ -25,15 +24,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:textSize="25sp"
-                android:text="支出" />
+                android:textSize="20sp"
+                android:text="支出"
+                android:textColor="@color/colorWhite" />
 
             <RadioButton
                 android:id="@+id/radio_income"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="25sp"
-                android:text="收入" />
+                android:textSize="20sp"
+                android:text="收入"
+                android:textColor="@color/colorWhite"/>
         </RadioGroup>
 
     </LinearLayout>
@@ -42,15 +43,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="种类："
-            android:textSize="25sp"
-            android:id="@+id/textView" />
+            android:textSize="20sp"
+            android:id="@+id/textView"
+            android:textColor="@color/colorGray"/>
 
         <Spinner
             android:scrollbarSize="20dp"
@@ -65,21 +67,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="时间："
-            android:textSize="25sp"
-            android:id="@+id/textView2" />
+            android:textSize="20sp"
+            android:id="@+id/textView2"
+            android:textColor="@color/colorGray"/>
 
         <TextView
             android:id="@+id/record_textView_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:hint="null" />
 
         <Button
@@ -89,6 +92,7 @@
             android:layout_width="120dp"
             android:layout_height="40dp"
             android:text="选择时间"
+            android:textColor="@color/colorGray"
             />
 
 
@@ -100,22 +104,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="金额："
-            android:textSize="25sp"
-            android:textColor="#fff"
-            android:id="@+id/textView3" />
+            android:textSize="20sp"
+            android:textColor="@color/colorGray"
+            android:id="@+id/textView3"
+            />
 
         <EditText
             android:id="@+id/record_textView_money"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:textColorHint="#afe1e2"
             android:hint="请输入消费/收入的金额"
             />
@@ -127,15 +132,15 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="支付方式："
-            android:textSize="25sp"
-            android:textColor="#fff"
+            android:textSize="20sp"
+            android:textColor="@color/colorGray"
             android:id="@+id/textView4" />
 
         <Spinner
@@ -152,22 +157,22 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="备注："
-            android:textSize="25sp"
-            android:textColor="#fff"
+            android:textSize="20sp"
+            android:textColor="@color/colorGray"
             android:id="@+id/textView5" />
 
         <EditText
             android:id="@+id/record_textView_comment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:textColorHint="#afe1e2"
             android:hint="请输入备注"
             />
@@ -178,8 +183,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-
-        >
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp">
 
         <Button
             android:id="@+id/recorder_confirm"
@@ -197,24 +203,51 @@
             android:textAllCaps="false"
             android:layout_weight="1"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <ImageView
-            android:id="@+id/cost_photo"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:scaleType="centerInside"
-            android:cropToPadding="true"
-            android:background="@android:color/darker_gray"/>
+        android:layout_height="250dp"
+        android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/cost_camera"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_camera"/>
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/cost_photo"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:background="@android:color/darker_gray"
+                android:cropToPadding="true"
+                android:scaleType="centerInside" />
 
+            <ImageButton
+                android:id="@+id/cost_camera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_camera"/>
+
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/scrollView1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/div"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
+
+
 
 </LinearLayout>
